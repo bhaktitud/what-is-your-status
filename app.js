@@ -171,7 +171,7 @@ async function readTasks() {
     render();
     renderOwnerOptions(taskForm.elements.id.value
       ? taskForm.elements.owner.value
-      : "Gue");
+      : "Saya");
     renderPeopleList();
   } catch (error) {
     showStorageFailure(error);
@@ -461,7 +461,7 @@ function openTaskForm(task) {
   taskForm.elements.title.value = task?.title || "";
   taskForm.elements.project.value = task?.project || "";
   taskForm.elements.lane.value = task?.lane || "action";
-  renderOwnerOptions(task?.owner || "Gue");
+  renderOwnerOptions(task?.owner || "Saya");
   taskForm.elements.nextAction.value = task?.nextAction || "";
   taskForm.elements.followUpAt.value = task?.followUpAt || "";
   document.querySelector("#task-dialog-title").textContent = task ? "Edit task" : "Tambah task";
@@ -559,7 +559,7 @@ async function createExample() {
     title: "Integrasi WebBeds ke TourPlan",
     project: "WebBeds ke TourPlan",
     lane: "action",
-    owner: "Gue",
+    owner: "Saya",
     nextAction: "Follow up mapping process dan kebutuhan freelancer",
     followUpAt: "",
     updatedAt: "2026-10-13",
@@ -748,9 +748,9 @@ searchInput.addEventListener("input", () => {
 taskForm.elements.lane.addEventListener("change", () => {
   if (taskForm.elements.id.value) return;
   if (taskForm.elements.lane.value === "action" && !taskForm.elements.owner.value.trim()) {
-    taskForm.elements.owner.value = "Gue";
+    taskForm.elements.owner.value = "Saya";
   }
-  if (taskForm.elements.lane.value !== "action" && taskForm.elements.owner.value.trim() === "Gue") {
+  if (taskForm.elements.lane.value !== "action" && taskForm.elements.owner.value.trim() === "Saya") {
     taskForm.elements.owner.value = "";
   }
 });

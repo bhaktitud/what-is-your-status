@@ -62,7 +62,7 @@ class WorkQueueApiTests(unittest.TestCase):
             "title": "Integrasi WebBeds ke TourPlan",
             "project": "Integrasi",
             "lane": "action",
-            "owner": "Gue",
+            "owner": "Saya",
             "nextAction": "Follow up mapping process",
             "followUpAt": "",
             "isExample": False,
@@ -135,13 +135,13 @@ class WorkQueueApiTests(unittest.TestCase):
 
         status, result = self.request("GET", "/api/people")
         self.assertEqual(status, 200)
-        self.assertEqual([person["name"] for person in result["people"]], ["Gue", "Jared Smith"])
+        self.assertEqual([person["name"] for person in result["people"]], ["Jared Smith", "Saya"])
 
         self.stop_server()
         self.start_server()
         self.assertEqual(
             [person["name"] for person in self.request("GET", "/api/people")[1]["people"]],
-            ["Gue", "Jared Smith"],
+            ["Jared Smith", "Saya"],
         )
 
     def test_task_owners_are_added_to_the_people_list(self):
@@ -174,7 +174,7 @@ class WorkQueueApiTests(unittest.TestCase):
         initialize_database(legacy_path)
         with sqlite3.connect(legacy_path) as connection:
             self.assertEqual(connection.execute("PRAGMA user_version").fetchone()[0], 2)
-            self.assertEqual(connection.execute("SELECT name FROM people ORDER BY name COLLATE NOCASE").fetchall(), [("Gue",), ("Jared Smith",)])
+            self.assertEqual(connection.execute("SELECT name FROM people ORDER BY name COLLATE NOCASE").fetchall(), [("Jared Smith",), ("Saya",)])
             self.assertEqual(connection.execute("SELECT owner FROM tasks WHERE id = 'legacy-task'").fetchone(), ("Jared Smith",))
             self.assertEqual(connection.execute("SELECT note FROM events WHERE id = 'legacy-event'").fetchone(), ("Sudah email",))
 

@@ -456,7 +456,7 @@ def initialize_database(database_path):
                     name = " ".join(row["owner"].split())
                     if name:
                         owners.setdefault(name.casefold(), name)
-                owners["gue"] = "Gue"
+                owners["saya"] = "Saya"
                 for name in sorted(owners.values(), key=str.casefold):
                     connection.execute(
                         "INSERT OR IGNORE INTO people (id, name) VALUES (?, ?)",
