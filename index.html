@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f7fa">
+    <meta name="description" content="Pantau status kerjaan, penanggung jawab, dan langkah kerja berikutnya.">
+    <title>What's Your Status?</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navigasi kerja">
+        <a class="wordmark" href="#main" aria-label="What's Your Status?, ke konten utama">What's Your Status?</a>
+        <p class="sidebar-label">Ruang kerja pribadi</p>
+        <nav class="filter-nav" aria-label="Filter task">
+          <button class="nav-item is-active" type="button" data-filter="all">
+            <span>Semua kerjaan</span><span class="nav-count" data-count="all">0</span>
+          </button>
+          <button class="nav-item" type="button" data-filter="action">
+            <span>Perlu gue gerakkan</span><span class="nav-count" data-count="action">0</span>
+          </button>
+          <button class="nav-item" type="button" data-filter="waiting">
+            <span>Nunggu orang lain</span><span class="nav-count" data-count="waiting">0</span>
+          </button>
+          <button class="nav-item" type="button" data-filter="no-followup">
+            <span>Belum ada follow-up</span><span class="nav-count" data-count="no-followup">0</span>
+          </button>
+          <button class="nav-item" type="button" data-filter="blocked">
+            <span>Terhambat</span><span class="nav-count" data-count="blocked">0</span>
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <span class="storage-mark" id="storage-mark" data-state="loading" aria-hidden="true"></span>
+          <span id="storage-label">Memuat SQLite...</span>
+        </div>
+      </aside>
+
+      <main class="main-content" id="main">
+        <header class="topbar">
+          <p class="date-label" id="today-label"></p>
+          <div class="topbar-actions">
+            <label class="search-wrap">
+              <span class="visually-hidden">Cari kerjaan</span>
+              <input id="search-input" type="search" placeholder="Cari task atau orang" autocomplete="off">
+              <kbd aria-hidden="true">/</kbd>
+            </label>
+            <button class="button button-primary" type="button" data-action="new-task">Task baru</button>
+          </div>
+        </header>
+
+        <section class="page-intro" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">WORK QUEUE</p>
+            <h1 id="page-title">Kerjaan yang perlu bergerak.</h1>
+            <p class="intro-copy">Lihat status kerjaan dan siapa yang perlu bergerak berikutnya.</p>
+          </div>
+          <p class="save-status" id="save-status" role="status">Menghubungkan ke SQLite...</p>
+        </section>
+
+        <section class="snapshot" aria-label="Ringkasan kerjaan">
+          <button class="snapshot-item" type="button" data-filter="action">
+            <span class="snapshot-count" data-summary="action">0</span>
+            <span class="snapshot-label">Perlu gue gerakkan</span>
+          </button>
+          <button class="snapshot-item" type="button" data-filter="waiting">
+            <span class="snapshot-count" data-summary="waiting">0</span>
+            <span class="snapshot-label">Nunggu orang lain</span>
+          </button>
+          <button class="snapshot-item" type="button" data-filter="no-followup">
+            <span class="snapshot-count" data-summary="no-followup">0</span>
+            <span class="snapshot-label">Follow-up belum diatur</span>
+          </button>
+        </section>
+
+        <section class="queue-area" aria-label="Daftar kerjaan">
+          <div id="queue-content" aria-live="polite" aria-busy="true">
+            <div class="loading-state">
+              <p>Memuat task dari SQLite...</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="modal" id="task-dialog" aria-labelledby="task-dialog-title">
+      <form id="task-form" class="modal-form">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">TASK</p>
+            <h2 id="task-dialog-title">Tambah task</h2>
+          </div>
+          <button class="icon-button" type="button" aria-label="Tutup" data-action="close-task-dialog">×</button>
+        </div>
+        <input id="task-id" name="id" type="hidden">
+        <label class="field">
+          <span>Nama task</span>
+          <input name="title" required maxlength="140" placeholder="Contoh: Integrasi WebBeds ke TourPlan">
+        </label>
+        <label class="field">
+          <span>Proyek <span class="optional">(opsional)</span></span>
+          <input name="project" maxlength="100" placeholder="Nama proyek atau area kerja">
+        </label>
+        <div class="field-row assignment-row" role="group" aria-label="Status kerjaan dan penanggung jawab">
+          <label class="field assignment-field">
+            <span class="field-label">Status kerjaan</span>
+            <select name="lane">
+              <option value="action">Perlu gue gerakkan</option>
+              <option value="external">Nunggu pihak luar</option>
+              <option value="internal">Nunggu internal</option>
+              <option value="blocked">Terhambat</option>
+              <option value="done">Selesai</option>
+            </select>
+          </label>
+          <div class="field assignment-field">
+            <label class="field-label" for="task-owner">Giliran ada pada</label>
+            <div class="owner-control-row">
+              <select id="task-owner" name="owner" required></select>
+              <button class="button button-quiet button-add-person" type="button" data-action="open-person-dialog">Tambah orang</button>
+            </div>
+          </div>
+        </div>
+        <label class="field">
+          <span>Langkah berikutnya</span>
+          <textarea name="nextAction" required maxlength="240" rows="3" placeholder="Aksi konkret berikutnya, dan siapa yang perlu dihubungi"></textarea>
+        </label>
+        <label class="field">
+          <span>Jadwalkan follow-up <span class="optional">(opsional)</span></span>
+          <input name="followUpAt" type="date">
+        </label>
+        <p class="form-error" id="task-form-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button class="button button-quiet" type="button" data-action="close-task-dialog">Batal</button>
+          <button class="button button-primary" type="submit">Simpan task</button>
+        </div>
+      </form>
+      <dialog class="modal people-dialog" id="person-dialog" aria-labelledby="person-dialog-title">
+        <form class="modal-form" id="person-form">
+          <div class="dialog-heading">
+            <div>
+              <p class="eyebrow">DAFTAR ORANG</p>
+              <h2 id="person-dialog-title">Tambah orang</h2>
+            </div>
+            <button class="icon-button" type="button" aria-label="Tutup" data-action="close-person-dialog">×</button>
+          </div>
+          <label class="field">
+            <span>Nama orang</span>
+            <input name="name" required maxlength="80" autocomplete="name" placeholder="Nama orang yang memegang task">
+          </label>
+          <p class="form-error" id="person-form-error" role="alert"></p>
+          <div class="dialog-actions">
+            <button class="button button-quiet" type="button" data-action="close-person-dialog">Batal</button>
+            <button class="button button-primary" type="submit">Simpan orang</button>
+          </div>
+          <section class="people-directory" aria-labelledby="people-directory-title">
+            <h3 id="people-directory-title">Orang tersimpan</h3>
+            <ul class="people-list" id="people-list" aria-live="polite"></ul>
+          </section>
+        </form>
+      </dialog>
+    </dialog>
+
+    <dialog class="detail-dialog" id="detail-dialog" aria-labelledby="detail-title">
+      <div id="detail-content"></div>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
